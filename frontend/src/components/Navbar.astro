@@ -1,0 +1,47 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<header class="bg-white border-b border-gray-200">
+  <nav class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a href="/" class="text-xl font-bold text-gray-900 hover:text-sky-600 transition-colors">
+        Blog
+      </a>
+      <div class="flex items-center gap-4">
+        <a
+          href="/"
+          class:list={[
+            'text-sm font-medium transition-colors',
+            currentPath === '/' ? 'text-sky-600' : 'text-gray-600 hover:text-gray-900',
+          ]}
+        >
+          Home
+        </a>
+        <a
+          href="/create"
+          class:list={[
+            'inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-lg transition-colors',
+            currentPath === '/create'
+              ? 'bg-sky-600 text-white'
+              : 'bg-sky-50 text-sky-600 hover:bg-sky-100',
+          ]}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          New Post
+        </a>
+        <a
+          href="/login"
+          class:list={[
+            'text-sm font-medium transition-colors',
+            currentPath === '/login' ? 'text-sky-600' : 'text-gray-600 hover:text-gray-900',
+          ]}
+        >
+          Login
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>
