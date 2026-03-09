@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ErrorMessage from '../../components/ErrorMessage.astro';
+import { getPostById } from '../../services/api';
+import type { Post } from '../../types/post';
+
+const { id } = Astro.params;
+
+let post: Post | null = null;
+let error = '';
+
+if (!id) {
+  error = 'Post ID is required';
+} else {
+  try {
+    post = await getPostById(id);
+  } catch (e: unknown) {
+    const err = e as { message?: string; statusCode?: number };
+    if (err.statusCode === 404) {
+      error = 'Post not found';
+    } else {
+      error = err.message || 'Failed to load post';
+    }
+  }
+}
+
+const date = post
+  ? new Date(post.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : '';
+
+const updatedDate = post
+  ? new Date(post.updatedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : '';
+---
+
+<BaseLayout title={post?.title || 'Post'}>
+  {error ? (
+    <ErrorMessage message={error} />
+  ) : post ? (
+    <article class="max-w-3xl">
+      <header class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+          {post.title}
+        </h1>
+        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+          {post.author && (
+            <span class="font-medium text-sky-600 bg-sky-50 px-2.5 py-1 rounded-full">
+              {post.author.email}
+            </span>
+          )}
+          <time datetime={post.createdAt}>Published {date}</time>
+          {date !== updatedDate && (
+            <span class="text-gray-400">
+              &middot; Updated {updatedDate}
+            </span>
+          )}
+        </div>
+      </header>
+
+      <div class="prose prose-gray max-w-none">
+        <div class="text-gray-700 leading-relaxed whitespace-pre-wrap text-base">
+          {post.content}
+        </div>
+      </div>
+
+      <footer class="mt-10 pt-6 border-t border-gray-200 flex items-center gap-3">
+        <a
+          href="/"
+          class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Back to posts
+        </a>
+        <a
+          href={`/edit/${post.id}`}
+          class="inline-flex items-center text-sm text-sky-600 hover:text-sky-700 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+          Edit
+        </a>
+      </footer>
+    </article>
+  ) : null}
+</BaseLayout>
