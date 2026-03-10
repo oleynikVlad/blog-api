@@ -118,7 +118,6 @@ export class PostsService {
     await this.postsRepository.remove(post);
   }
 
-  // Find or create tags
   async findOrCreate(tagNames: string[] | undefined): Promise<Tag[]> {
     if (!tagNames) {
       return [];

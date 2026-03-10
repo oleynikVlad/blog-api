@@ -15,6 +15,7 @@ import { Post } from './post.entity';
 
 @Entity('tags')
 export class Tag {
+  @Exclude()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
