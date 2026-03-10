@@ -16,6 +16,7 @@ export class AuthService {
     const user = await this.usersService.create(
       registerDto.email,
       registerDto.password,
+      registerDto.name,
     );
 
     const payload: JwtPayload = { sub: user.id, email: user.email };

@@ -15,7 +15,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(email: string, password: string): Promise<User> {
+  async create(email: string, password: string, name?: string): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
       where: { email },
     });
@@ -30,6 +30,7 @@ export class UsersService {
     const user = this.usersRepository.create({
       email,
       password: hashedPassword,
+      name: name || null,
     });
 
     return this.usersRepository.save(user);
