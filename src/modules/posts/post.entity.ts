@@ -20,6 +20,18 @@ export class Post {
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  coverImage: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  tags: string[];
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  category: string;
+
   @Column({ type: 'uuid' })
   authorId: string;
 
