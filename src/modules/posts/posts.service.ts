@@ -5,16 +5,20 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, In, IsNull, Not, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { CreatePostDto, UpdatePostDto } from './dto';
 import slugify from 'slugify';
+import { GetPostsQueryDto } from 'src/modules/posts/dto/get-posts-query.dto';
+import { Tag } from 'src/modules/posts/entities/tag.entity';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectRepository(Post)
     private readonly postsRepository: Repository<Post>,
+    @InjectRepository(Tag)
+    private tagsRepository: Repository<Tag>,
   ) {}
 
   async create(createPostDto: CreatePostDto, authorId: string): Promise<Post> {
@@ -28,27 +32,51 @@ export class PostsService {
     });
     const postBySlug = await this.postsRepository.findOne({
       where: { slug },
-      relations: ['author'],
     });
 
     if (postBySlug) {
       throw new ConflictException('slug already exists');
     }
+    let tags = await this.findOrCreate(createPostDto.tags);
 
     const post = this.postsRepository.create({
       ...createPostDto,
       authorId,
       slug,
+      tags,
     });
 
     return this.postsRepository.save(post);
   }
 
-  async findAll(): Promise<Post[]> {
-    return this.postsRepository.find({
+  async findAll(query: GetPostsQueryDto) {
+    const skip = (query.page - 1) * query.limit;
+
+    let where: any;
+
+    if (query.search) {
+      where = [
+        { title: ILike(`%${query.search}%`), publishedAt: Not(IsNull()) },
+        { content: ILike(`%${query.search}%`), publishedAt: Not(IsNull()) },
+      ];
+    } else {
+      where = { publishedAt: Not(IsNull()) };
+    }
+
+    const [items, total] = await this.postsRepository.findAndCount({
+      where,
+      order: { publishedAt: 'DESC' },
+      take: query.limit,
+      skip: skip,
       relations: ['author'],
-      order: { createdAt: 'DESC' },
     });
+    console.log(`Found ${total} posts for search query: ${query.search}`);
+    return {
+      items,
+      total,
+      page: query.page,
+      lastPage: Math.ceil(total / query.limit),
+    };
   }
 
   async findById(id: string): Promise<Post> {
@@ -62,14 +90,6 @@ export class PostsService {
     }
 
     return post;
-  }
-
-  async findByAuthor(authorId: string): Promise<Post[]> {
-    return this.postsRepository.find({
-      where: { authorId },
-      relations: ['author'],
-      order: { createdAt: 'DESC' },
-    });
   }
 
   async update(
@@ -96,5 +116,27 @@ export class PostsService {
     }
 
     await this.postsRepository.remove(post);
+  }
+
+  // Find or create tags
+  async findOrCreate(tagNames: string[] | undefined): Promise<Tag[]> {
+    if (!tagNames) {
+      return [];
+    }
+    const existingTags = await this.tagsRepository.findBy({
+      name: In(tagNames),
+    });
+    const existingTagNames = existingTags.map((tag) => tag.name);
+
+    const newTagNames = tagNames.filter(
+      (name) => !existingTagNames.includes(name),
+    );
+
+    const newTags = newTagNames.map((name) =>
+      this.tagsRepository.create({ name }),
+    );
+    await this.tagsRepository.save(newTags);
+
+    return [...existingTags, ...newTags];
   }
 }

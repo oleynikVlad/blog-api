@@ -11,6 +11,7 @@ import { Post } from '../posts/entities/post.entity';
 
 @Entity('users')
 export class User {
+  @Exclude()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -36,6 +37,7 @@ export class User {
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 

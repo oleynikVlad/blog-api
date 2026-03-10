@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDto } from './dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { GetPostsQueryDto } from 'src/modules/posts/dto/get-posts-query.dto';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -51,39 +53,8 @@ export class PostsController {
     status: 200,
     description: 'Returns all blog posts',
   })
-  async findAll() {
-    return this.postsService.findAll();
-  }
-
-  @Get('author/:authorId')
-  @ApiOperation({ summary: 'Get all posts by a specific author' })
-  @ApiParam({
-    name: 'authorId',
-    description: 'UUID of the author',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns all posts by the specified author',
-  })
-  async findByAuthor(@Param('authorId', ParseUUIDPipe) authorId: string) {
-    return this.postsService.findByAuthor(authorId);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a blog post by ID' })
-  @ApiParam({
-    name: 'id',
-    description: 'UUID of the blog post',
-    type: 'string',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns the blog post',
-  })
-  @ApiResponse({ status: 404, description: 'Post not found' })
-  async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.postsService.findById(id);
+  async findAll(@Query() query: GetPostsQueryDto) {
+    return this.postsService.findAll(query);
   }
 
   @Patch(':id')

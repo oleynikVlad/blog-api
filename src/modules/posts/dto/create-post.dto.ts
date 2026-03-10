@@ -54,14 +54,4 @@ export class CreatePostDto {
   @IsArray()
   @IsString({ each: true })
   tags?: string[];
-
-  @ApiProperty({
-    description: 'Category of the blog post',
-    example: 'Technology',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  category?: string;
 }

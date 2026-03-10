@@ -6,8 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../users/user.entity';
+import { Exclude } from 'class-transformer';
+import { Tag } from './tag.entity';
 
 @Entity('posts')
 export class Post {
@@ -26,8 +30,11 @@ export class Post {
   @Column({ type: 'varchar', length: 500, nullable: true })
   coverImage: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  tags: string[];
+  @ManyToMany(() => Tag, (tag) => tag.posts, {
+    cascade: true, // Allows creating new tags via a post
+  })
+  @JoinTable() // @JoinTable must be specified on one side of the relation
+  tags: Tag[];
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string;
@@ -35,6 +42,7 @@ export class Post {
   @Column({ type: 'varchar', length: 255, unique: true })
   slug: string;
 
+  @Exclude()
   @Column({ type: 'uuid' })
   authorId: string;
 
@@ -42,9 +50,14 @@ export class Post {
   @JoinColumn({ name: 'authorId' })
   author: User;
 
+  @Exclude()
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
+  @Exclude()
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  publishedAt: Date;
 }
