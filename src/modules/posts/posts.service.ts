@@ -2,11 +2,13 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from './post.entity';
+import { Post } from './entities/post.entity';
 import { CreatePostDto, UpdatePostDto } from './dto';
+import slugify from 'slugify';
 
 @Injectable()
 export class PostsService {
@@ -16,9 +18,27 @@ export class PostsService {
   ) {}
 
   async create(createPostDto: CreatePostDto, authorId: string): Promise<Post> {
+    const slug = slugify(createPostDto.title, {
+      replacement: '-',
+      remove: /[*+~.()'"!:@]/g,
+      lower: true,
+      strict: true,
+      locale: 'uk',
+      trim: true,
+    });
+    const postBySlug = await this.postsRepository.findOne({
+      where: { slug },
+      relations: ['author'],
+    });
+
+    if (postBySlug) {
+      throw new ConflictException('slug already exists');
+    }
+
     const post = this.postsRepository.create({
       ...createPostDto,
       authorId,
+      slug,
     });
 
     return this.postsRepository.save(post);

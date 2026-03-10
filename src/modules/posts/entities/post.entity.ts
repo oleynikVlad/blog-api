@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Entity('posts')
 export class Post {
@@ -31,6 +31,9 @@ export class Post {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   category: string;
+
+  @Column({ type: 'varchar', length: 255, unique: true })
+  slug: string;
 
   @Column({ type: 'uuid' })
   authorId: string;

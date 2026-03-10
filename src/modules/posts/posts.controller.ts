@@ -20,8 +20,8 @@ import {
 } from '@nestjs/swagger';
 import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDto } from './dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -30,7 +30,7 @@ export class PostsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('access-token')
+  @ApiBearerAuth('Authorization')
   @ApiOperation({ summary: 'Create a new blog post' })
   @ApiResponse({
     status: 201,

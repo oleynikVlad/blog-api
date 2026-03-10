@@ -16,7 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get<string>('DB_NAME', 'blog_api'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        synchronize: false,
+        synchronize: true,
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
     }),

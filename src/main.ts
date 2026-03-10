@@ -2,12 +2,15 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(helmet());
 
   app.enableCors({
     origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
@@ -26,6 +29,7 @@ async function bootstrap() {
         'Supports user registration, authentication, and full CRUD operations on blog posts.',
     )
     .setVersion('1.0')
+    .setExternalDoc('Postman Collection', '/docs-json')
     .addBearerAuth(
       {
         type: 'http',
